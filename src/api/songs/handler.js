@@ -60,11 +60,11 @@ class SongsHandler {
       const response = h.response({
         status: 'success',
         data: {
-          songs: songs.map((song => ({
+          songs: songs.map((song) => ({
             id: song.id,
             title: song.title,
             performer: song.performer,
-          }))),
+          })),
         },
       });
       response.code(200);
