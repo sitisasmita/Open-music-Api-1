@@ -1,6 +1,6 @@
 /* eslint-disable no-underscore-dangle */
-const { nanoid } = require('nanoid');
 const { Pool } = require('pg');
+const { nanoid } = require('nanoid');
 const AuthorizationError = require('../../exceptions/AuthorizationError');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
@@ -56,7 +56,7 @@ class PlaylistsService {
     }
   }
 
-  async addSongToPlaylist(playlistId, songId) {
+  async addSongPlaylist(playlistId, songId) {
     const id = `ps-${nanoid(16)}`;
 
     const query = {
@@ -71,7 +71,7 @@ class PlaylistsService {
     }
   }
 
-  async getSongsFromPlaylist(playlistId) {
+  async getSongsPlaylist(playlistId) {
     const query = {
       text: `SELECT songs.id, songs.title, songs.performer FROM songs
             LEFT JOIN playlistsongs ON songs.id = playlistsongs.song_id
@@ -84,7 +84,7 @@ class PlaylistsService {
     return result.rows;
   }
 
-  async deleteSongFromPlaylist(playlistId, songId) {
+  async deleteSongPlaylist(playlistId, songId) {
     const query = {
       text: 'DELETE FROM playlistsongs WHERE playlist_id = $1 AND song_id = $2 RETURNING id',
       values: [playlistId, songId],

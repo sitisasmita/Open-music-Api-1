@@ -1,10 +1,8 @@
-/* eslint-disable class-methods-use-this */
 /* eslint-disable no-underscore-dangle */
-/* eslint-disable no-unused-vars */
 const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
-const { mapDBToModel, mapDBToModelDetail } = require('../../utils');
+const { mapDBToModel, mapDBToModelGroup } = require('../../utils');
 const NotFoundError = require('../../exceptions/NotFoundError');
 
 class SongsService {
@@ -48,7 +46,7 @@ class SongsService {
       throw new NotFoundError('Lagu tidak ditemukan');
     }
 
-    return result.rows.map(mapDBToModelDetail)[0];
+    return result.rows.map(mapDBToModelGroup)[0];
   }
 
   async editSongById(songId, {

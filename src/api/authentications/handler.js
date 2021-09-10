@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-const { errorHandler } = require('../../utils');
+const ClientError = require('../../exceptions/ClientError');
 
 class AuthenticationsHandler {
   constructor(authenticationsService, usersService, tokenManager, validator) {
@@ -18,15 +18,10 @@ class AuthenticationsHandler {
       this._validator.validatePostAuthenticationPayload(request.payload);
 
       const { username, password } = request.payload;
-      const id = await this._usersService.verifyUserCredential(
-        username,
-        password,
-      );
+      const id = await this._usersService.verifyUserCredential(username, password);
 
       const accessToken = this._tokenManager.generateAccessToken({ id });
-      const refreshToken = this._tokenManager.generateRefreshToken({
-        id,
-      });
+      const refreshToken = this._tokenManager.generateRefreshToken({ id });
 
       await this._authenticationsService.addRefreshToken(refreshToken);
 
@@ -41,7 +36,23 @@ class AuthenticationsHandler {
       response.code(201);
       return response;
     } catch (error) {
-      return errorHandler(error, h);
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: error.message,
+        });
+        response.code(error.statusCode);
+        return response;
+      }
+
+      // Server ERROR!
+      const response = h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
+      });
+      response.code(500);
+      console.error(error);
+      return response;
     }
   }
 
@@ -50,12 +61,10 @@ class AuthenticationsHandler {
       this._validator.validatePutAuthenticationPayload(request.payload);
 
       const { refreshToken } = request.payload;
-
       await this._authenticationsService.verifyRefreshToken(refreshToken);
       const { id } = this._tokenManager.verifyRefreshToken(refreshToken);
 
       const accessToken = this._tokenManager.generateAccessToken({ id });
-
       return {
         status: 'success',
         message: 'Access Token berhasil diperbarui',
@@ -64,18 +73,31 @@ class AuthenticationsHandler {
         },
       };
     } catch (error) {
-      return errorHandler(error, h);
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: error.message,
+        });
+        response.code(error.statusCode);
+        return response;
+      }
+
+      // Server ERROR!
+      const response = h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
+      });
+      response.code(500);
+      console.error(error);
+      return response;
     }
   }
 
   async deleteAuthenticationHandler(request, h) {
     try {
-      this._validator.validateDeleteAuthenticationPayload(
-        request.payload,
-      );
+      this._validator.validateDeleteAuthenticationPayload(request.payload);
 
       const { refreshToken } = request.payload;
-
       await this._authenticationsService.verifyRefreshToken(refreshToken);
       await this._authenticationsService.deleteRefreshToken(refreshToken);
 
@@ -84,7 +106,23 @@ class AuthenticationsHandler {
         message: 'Refresh token berhasil dihapus',
       };
     } catch (error) {
-      return errorHandler(error, h);
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: error.message,
+        });
+        response.code(error.statusCode);
+        return response;
+      }
+
+      // Server ERROR!
+      const response = h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
+      });
+      response.code(500);
+      console.error(error);
+      return response;
     }
   }
 }
